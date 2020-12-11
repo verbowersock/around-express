@@ -6,17 +6,38 @@ module.exports.getCards = (req, res) => {
      .catch(() => res.status(500).send({ message: 'Error occured on the server' }));
  };
 
- module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res) => {
    const { name, link } = req.body;
    Card.create({ name, link, owner:req.user._id })
      .then(card => res.send({ data: card }))
-     .catch(() => res.status(500).send({ message: 'Error occured on the server' }));
- }
+     .catch((err) => {
+     if (err.name == "ValidationError") {
+         res.status (400).send({message: 'Invalid data'})
+     }
+     else if (err.name == 'CastError') {
+         res.status(404).send ({message: 'Invalid request'})
+     }
+     else{
+      res.status(500).send({ message: 'Error occured on the server' })
+    }
+  })
+ };
 
- module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res) => {
     Card.findByIdAndRemove(req.params.id)
     .then(user => res.send({ "message":"deleted successfully" }))
-    .catch(err => res.status(500).send({ message: 'Error' }));
-}
+    .catch((err) => {
+        if (err.name == "ValidationError") {
+            res.status (400).send({message: 'Invalid data'})
+        }
+        else if (err.name == 'CastError') {
+            res.status(404).send ({message: 'Invalid card id'})
+        }
+        else{
+         res.status(500).send({ message: 'Error occured on the server' })
+       }
+     })
+    };
+
 
  
