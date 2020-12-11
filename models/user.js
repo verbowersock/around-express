@@ -19,3 +19,4 @@ const userSchema = new mongoose.Schema({
     validate: /https?:\/\/(www)?.\S*/gi
 }   
 }); 
+module.exports = mongoose.model('user', userSchema);

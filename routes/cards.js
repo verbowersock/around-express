@@ -1,18 +1,8 @@
 const router = require('express').Router();
-const path = require('path');
-const fs = require('fs');
+const { getCards, createCard, deleteCard} = require('../controllers/cards');
 
-module.exports = router;
+router.get('/', getCards);
+router.post('/', createCard);
+router.delete('/:cardId', deleteCard)
 
-const filePath = path.join(__dirname, '..', 'data', 'cards.json');
-
-router.get('/', (req, res) => {
-  fs.readFile(filePath, { encoding: 'utf8' }, (err, data) => {
-    if (err) {
-      res.status(404).json({ message: 'Resource not found' });
-      return;
-    }
-    const cards = JSON.parse(data);
-    res.send(cards);
-  });
-});
+ module.exports = router;

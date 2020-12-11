@@ -1,12 +1,10 @@
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
-    res.send("in controller")
-/*    User.find({})
-    console.log("going into the controller")
+    User.find({})
      .then(users => res.send({ data: users }))
      .catch(() => res.status(500).send({ message: 'Error occured on the server' }));
-*/};
+ };
 
  module.exports.getUser = (req, res) => {
      const { userId } = req.params;
