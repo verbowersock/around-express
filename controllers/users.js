@@ -4,9 +4,9 @@ module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(400).send({ message: 'Invalid data' });
-      } else if (err.name === 'CastError') {
+      } else if (err.name === 'ValidationError') {
         res.status(404).send({ message: 'Invalid request' });
       } else {
         res.status(500).send({ message: 'Error occured on the server' });
@@ -16,13 +16,16 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   const { userId } = req.params;
-  User.find({ _id: userId })
-    .then((users) => res.send({ data: users }))
+  User.findOne({ _id: userId })
+    .then((user) => {
+      if (user) {
+        res.send({ data: user });
+      }
+      res.status(404).send({ message: 'User ID not found' });
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Invalid data' });
-      } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Invalid user ID' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Invalid ID' });
       } else {
         res.status(500).send({ message: 'Error occured on the server' });
       }
@@ -46,13 +49,16 @@ module.exports.createUser = (req, res) => {
 
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Invalid data' });
-      } else if (err.name === 'CastError') {
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+    .then((user) => {
+      if (!user) {
         res.status(404).send({ message: 'User ID not found' });
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Invalid data' });
       } else {
         res.status(500).send({ message: 'Error occured on the server' });
       }
@@ -60,13 +66,17 @@ module.exports.updateUser = (req, res) => {
 };
 
 module.exports.updateAvatar = (req, res) => {
-  User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Invalid data' });
-      } else if (err.name === 'CastError') {
+  // eslint-disable-next-line max-len
+  User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { runValidators: true, new: true })
+    .then((user) => {
+      if (!user) {
         res.status(404).send({ message: 'User ID not found' });
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Invalid data' });
       } else {
         res.status(500).send({ message: 'Error occured on the server' });
       }

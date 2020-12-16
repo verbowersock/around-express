@@ -7,7 +7,7 @@ const cards = require('./routes/cards.js');
 const { PORT = 3000 } = process.env;
 
 const app = express();
-app.use(express.static(`${__dirname}/public`));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect('mongodb://localhost:27017/aroundb', {
@@ -18,7 +18,7 @@ mongoose.connect('mongodb://localhost:27017/aroundb', {
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '5fd37cfd40344651b0c33031', // paste the _id of the test user created in the previous step
+    _id: '5fd37cfd40344651b0c33031',
   };
 
   next();

@@ -22,13 +22,16 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
-    .then(() => res.send({ message: 'deleted successfully' }))
+  Card.findByIdAndRemove(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Card ID not found' });
+      }
+      res.send({ message: 'deleted successfully' });
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Invalid data' });
-      } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Invalid card id' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Invalid card ID' });
       } else {
         res.status(500).send({ message: 'Error occured on the server' });
       }
@@ -41,12 +44,15 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send({ data: card.likes }))
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Card ID not found' });
+      }
+      res.send({ data: card.likes });
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Invalid data' });
-      } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Invalid card id' });
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        res.status(400).send({ message: 'Invalid Id passed' });
       } else {
         res.status(500).send({ message: 'Error occured on the server' });
       }
@@ -59,12 +65,15 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send({ data: card.likes }))
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Card ID not found' });
+      }
+      res.send({ data: card.likes });
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Invalid data' });
-      } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Invalid card id' });
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        res.status(400).send({ message: 'Invalid ID passed' });
       } else {
         res.status(500).send({ message: 'Error occured on the server' });
       }
